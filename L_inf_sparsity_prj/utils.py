@@ -10,6 +10,54 @@ import torch
 import torch.nn as nn
 import torch.nn.init as init
 import torchvision
+import torchvision.transforms as transforms
+from Resnet import *
+from SPS import *
+from FS import *
+
+
+def get_train_test_transfomes(defence_name):
+    if defence_name == 'Aug':
+        transform_train = transforms.Compose([  
+            transforms.RandomCrop(32, padding=4),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        ])
+
+        transform_test = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        ])
+        return transform_train, transform_test
+    elif defence_name == 'None' or defence_name == 'FS' or defence_name == 'SPS':
+        transform_train = transforms.Compose([  
+            transforms.ToTensor(),           
+        ])
+
+        transform_test = transforms.Compose([
+            transforms.ToTensor(),
+        ])
+    else:
+        print('not supported defence transform!!') 
+        exit()
+
+
+def get_model(defence_name):
+    if defence_name == 'Aug' or defence_name == 'None':
+        net = ResNet18()
+        return net
+    elif defence_name == 'SPS':
+        net = ResNet18()
+        net = add_spatial_preprocessing(net,3)
+        return net
+    elif defence_name == 'FS': 
+        net = ResNet18()
+        net = add_squeezing_preprocessing(net,5)
+        return net
+    else:
+        print('not supported defence model!!') 
+        exit()
 
 
 def extract_image(numberofExtract : int):

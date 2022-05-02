@@ -8,13 +8,8 @@ import torch.optim as optim
 import torch.backends.cudnn as cudnn
 
 import torchvision
-import torchvision.transforms as transforms
 
-from Resnet import *
-
-from SPS import *
-from FS import *
-
+from utils import *
 from tqdm import tqdm
 import argparse
 
@@ -89,60 +84,14 @@ def test(net, epoch, strDefenceName, testloader, criterion, isSave = True):
             torch.save(state, f'./models/{strDefenceName}/{acc:.2f}.pth')
             best_acc = acc
 
-def get_train_test_transfomes(defence_name):
-    if defence_name == 'Aug':
-        transform_train = transforms.Compose([  
-            transforms.RandomCrop(32, padding=4),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-        ])
-
-        transform_test = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-        ])
-        return transform_train, transform_test
-    elif defence_name == 'None' or defence_name == 'FS' or defence_name == 'SPS':
-        transform_train = transforms.Compose([  
-            transforms.ToTensor(),           
-        ])
-
-        transform_test = transforms.Compose([
-            transforms.ToTensor(),
-        ])
-    else:
-        print('not supported defence transform!!') 
-        exit()
-
-
-def get_model(defence_name):
-    if defence_name == 'Aug' or defence_name == 'None':
-        net = ResNet18()
-        return net
-    elif defence_name == 'SPS':
-        net = ResNet18()
-        net = add_spatial_preprocessing(net,3)
-        return net
-    elif defence_name == 'FS': 
-        net = ResNet18()
-        net = add_squeezing_preprocessing(net,5)
-        return net
-    else:
-        print('not supported defence model!!') 
-        exit()
-
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='테스트')
+    parser = argparse.ArgumentParser(description='Model Train code (None, Aug, FS, SPS)')
 
-    parser.add_argument("-modelname", type=str, help='Model name', default='Res18')
-    parser.add_argument("-defence_name", type=str, help='Defence name', default='Aug')
+    parser.add_argument("-defence_name", type=str, help='Defence name only support (None, Aug, FS, SPS)', default='Aug')
     parser.add_argument("-lr", type=float, help='input learning rate', default= 0.1)
     
     args = parser.parse_args()
-
-    print(args.modelname)
     
     defence_name = args.defence_name
     resume = False
@@ -150,8 +99,8 @@ if __name__ == "__main__":
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    best_acc = 0  # best test accuracy
-    start_epoch = 0  # start from epoch 0 or last checkpoint epoch
+    best_acc = 0  
+    start_epoch = 0  
 
     # Data
     print('==> Preparing data..')
