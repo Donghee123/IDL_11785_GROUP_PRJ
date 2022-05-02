@@ -1,5 +1,8 @@
 # IDL_11785_GROUP_PRJ
 
+# A New Metric for L-infinity Attack
+
+
 CMU IDL 11785 GROUP Project repository
 
 model train and test (Aug)
