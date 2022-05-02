@@ -12,7 +12,13 @@ import torchvision.transforms as transforms
 
 from Resnet import *
 
+from SPS import *
+from FS import *
+
 from tqdm import tqdm
+import argparse
+
+
 
 # Training
 def train(net, epoch, criterion, optimizer):
@@ -76,32 +82,81 @@ def test(net, epoch, strDefenceName, testloader, criterion, isSave = True):
                 'acc': acc,
                 'epoch': epoch,
             }
-            if not os.path.isdir('checkpoint'):
-                os.mkdir('checkpoint')
+            if not os.path.isdir('models'):
+                os.mkdir('models')
+            if not os.path.isdir(f'./models/{strDefenceName}'):
+                os.mkdir(f'./models/{strDefenceName}')
             torch.save(state, f'./models/{strDefenceName}/{acc:.2f}.pth')
             best_acc = acc
 
+def get_train_test_transfomes(defence_name):
+    if defence_name == 'Aug':
+        transform_train = transforms.Compose([  
+            transforms.RandomCrop(32, padding=4),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        ])
+
+        transform_test = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        ])
+        return transform_train, transform_test
+    elif defence_name == 'None' or defence_name == 'FS' or defence_name == 'SPS':
+        transform_train = transforms.Compose([  
+            transforms.ToTensor(),           
+        ])
+
+        transform_test = transforms.Compose([
+            transforms.ToTensor(),
+        ])
+    else:
+        print('not supported defence transform!!') 
+        exit()
+
+
+def get_model(defence_name):
+    if defence_name == 'Aug' or defence_name == 'None':
+        net = ResNet18()
+        return net
+    elif defence_name == 'SPS':
+        net = ResNet18()
+        net = add_spatial_preprocessing(net,3)
+        return net
+    elif defence_name == 'FS': 
+        net = ResNet18()
+        net = add_squeezing_preprocessing(net,5)
+        return net
+    else:
+        print('not supported defence model!!') 
+        exit()
+
 if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(description='테스트')
+
+    parser.add_argument("-modelname", type=str, help='Model name', default='Res18')
+    parser.add_argument("-defence_name", type=str, help='Defence name', default='Aug')
+    parser.add_argument("-lr", type=float, help='input learning rate', default= 0.1)
+    
+    args = parser.parse_args()
+
+    print(args.modelname)
+    
+    defence_name = args.defence_name
     resume = False
-    lr = 0.1
+    lr = args.lr
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
     best_acc = 0  # best test accuracy
     start_epoch = 0  # start from epoch 0 or last checkpoint epoch
 
     # Data
     print('==> Preparing data..')
-    transform_train = transforms.Compose([  
-        transforms.RandomCrop(32, padding=4),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-    ])
 
-    transform_test = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-    ])
+    transform_train, transform_test = get_train_test_transfomes(defence_name)
 
     trainset = torchvision.datasets.CIFAR10(
         root='./data', train=True, download=True, transform=transform_train)
@@ -118,7 +173,8 @@ if __name__ == "__main__":
 
     # Model
     print('==> Building model..')
-    net = ResNet18()
+
+    net = get_model(defence_name)
 
     net = net.to(device)
     if device == 'cuda':
@@ -141,6 +197,6 @@ if __name__ == "__main__":
 
     for epoch in range(start_epoch, start_epoch+200):
         train(net, epoch, criterion, optimizer)
-        test(net, epoch, "Aug", criterion)
+        test(net, epoch, defence_name, criterion)
         scheduler.step()
 
