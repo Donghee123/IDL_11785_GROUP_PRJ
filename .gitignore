@@ -1,5 +1,0 @@
-*.npy
-*.jpg
-*.pth
-L_inf_sparsity_prj/data
-L_inf_sparsity_prj/__pycache__
