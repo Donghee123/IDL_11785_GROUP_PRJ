@@ -1,7 +1,7 @@
 from art.defences.preprocessor.preprocessor import PreprocessorPyTorch
 from typing import Optional, Tuple, TYPE_CHECKING
 import numpy as np
-
+import torch.nn as nn
 if TYPE_CHECKING:
     # pylint: disable=C0412
     import torch
