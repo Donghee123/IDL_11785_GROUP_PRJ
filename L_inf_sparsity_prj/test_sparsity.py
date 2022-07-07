@@ -6,6 +6,7 @@ import torchvision.transforms as transforms
 from PIL import Image
 import random
 from cam import *
+import os
 
 class Test_Sparsity() :
     def __init__(self, transform = None, model=None,epsilon=None, starting_k=30,iter_number=30) :
@@ -117,6 +118,8 @@ class Test_Sparsity() :
     
         fake_image = image + noise
 
+        if not os.path.isdir('models'):
+            os.mkdir('models')
         cv2.imwrite(f'./image/image_{self.nTestCount}.jpg', cv2.resize(image,(225,225)))
         cv2.imwrite(f'./noise/noise_{self.nTestCount}.jpg', cv2.resize(noise,(225,225)))
         cv2.imwrite(f'./fakeimage/fakeimage_{self.nTestCount}.jpg', cv2.resize(fake_image,(225,225)))

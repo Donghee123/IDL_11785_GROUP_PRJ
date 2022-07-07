@@ -12,8 +12,8 @@ if __name__ == "__main__":
 
   parser = argparse.ArgumentParser(description='Model Train code (None, Aug, FS, SPS)')
 
-  parser.add_argument("-defence_name", type=str, help='Defence name only support (None, Aug, FS, SPS)', default='Aug')
-  parser.add_argument("-use_cam", type=int, help='use cam 1, no cam 0', default=0)
+  parser.add_argument("-defence_name", type=str, help='Defence name only support (None, Aug, FS, SPS)', default='None')
+  parser.add_argument("-use_cam", type=int, help='use cam 1, no cam 0', default=1)
     
   args = parser.parse_args()
   defence_name = args.defence_name
