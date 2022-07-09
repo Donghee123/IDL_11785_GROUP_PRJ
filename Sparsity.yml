@@ -113,4 +113,5 @@ dependencies:
     - werkzeug==2.1.2
     - wrapt==1.14.1
     - zipp==3.8.0
+    - opencv-python #fix_jh_0709
 prefix: /home/dongheehan/anaconda3/envs/Sparsity
