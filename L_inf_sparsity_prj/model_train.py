@@ -146,6 +146,7 @@ if __name__ == "__main__":
 
     for epoch in range(start_epoch, start_epoch+200):
         train(net, epoch, criterion, optimizer)
-        test(net, epoch, defence_name, criterion)
+        #test(net, epoch, defence_name, criterion) 
+        test(net, epoch, defence_name, testloader, criterion) # fix_jh_0709
         scheduler.step()
 
