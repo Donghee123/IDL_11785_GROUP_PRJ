@@ -7,12 +7,13 @@ CMU IDL 11785 GROUP Project repository
 
 environment set up
 >>conda env create -f Sparsity.yml
+
 >>conda activate Sparsity
 
 model train and test (Aug)
 >>cd L_inf_sparsity_prj
 
->>python model_train.py defence_name='Aug'
+>>python model_train.py -defence_name Aug 
 
 
 model evaluate spasity (Aug)
